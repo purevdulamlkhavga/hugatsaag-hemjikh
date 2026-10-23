@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Хугацааг Хэмжих - 2-р Анги</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800;900&display=swap');
+        
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #0b132b;
+            color: #f8fafc;
+            user-select: none;
+            overflow-x: hidden;
+        }
+
+        .heading-font {
+            font-family: 'Fredoka', cursive, sans-serif;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b132b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1c2541;
+            border-radius: 4px;
+        }
+
+        .card-glow {
+            box-shadow: 0 0 25px rgba(6, 182, 212, 0.08);
+        }
+
+        .card-glow-amber {
+            box-shadow: 0 0 25px rgba(245, 158, 11, 0.12);
+        }
+
+        .btn-press {
+            transition: transform 0.1s ease, background-color 0.2s, box-shadow 0.2s;
+        }
+        .btn-press:active {
+            transform: scale(0.95);
+        }
+
+        /* Clock styles */
+        .clock-face {
+            background: radial-gradient(circle, #1c2541 0%, #0f172a 100%);
+            border: 10px solid #3a506b;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.6), 0 0 30px rgba(6, 182, 212, 0.2);
+        }
+
+        .clock-hand {
+            transform-origin: 50% 100%;
+            transition: transform 0.05s cubic-bezier(0.4, 2.08, 0.55, 0.44);
+        }
+
+        /* Day/Night background animation transitions */
+        .sky-bg-day {
+            background: linear-gradient(135deg, #1e3a8a 0%, #0284c7 50%, #38bdf8 100%);
+        }
+        .sky-bg-night {
+            background: linear-gradient(135deg, #090d16 0%, #0f172a 50%, #1e1b4b 100%);
+        }
+
+        .pulse-subtle {
+            animation: pulseSubtle 2.5s infinite ease-in-out;
+        }
+        @keyframes pulseSubtle {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.03); opacity: 0.9; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-3 sm:p-6">
+
+    <div class="max-w-6xl mx-auto w-full flex-grow flex flex-col gap-5">
+        
+        <!-- HEADER / NAVIGATION TABS -->
+        <header class="bg-[#1c2541]/80 backdrop-blur-md p-2 rounded-2xl border border-[#3a506b]/40 flex flex-wrap gap-2 justify-center sm:justify-start items-center shadow-xl">
+            <button onclick="switchTab('tab1')" id="nav-tab1" class="tab-btn flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm sm:text-base transition-all bg-[#06b6d4] text-slate-950 shadow-lg shadow-cyan-500/20">
+                <span class="text-lg">🕒</span> Цаг уншиж сурья
+            </button>
+            <button onclick="switchTab('tab2')" id="nav-tab2" class="tab-btn flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm sm:text-base transition-all text-slate-300 hover:bg-[#3a506b]/40 hover:text-white">
+                <i class="fa-solid fa-hourglass-half text-amber-400"></i> Хугацааны нэгжүүд
+            </button>
+            <button onclick="switchTab('tab3')" id="nav-tab3" class="tab-btn flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm sm:text-base transition-all text-slate-300 hover:bg-[#3a506b]/40 hover:text-white">
+                <i class="fa-solid fa-calendar-days text-emerald-400"></i> Гараг & Сар
+            </button>
+            <button onclick="switchTab('tab4')" id="nav-tab4" class="tab-btn flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm sm:text-base transition-all text-slate-300 hover:bg-[#3a506b]/40 hover:text-white">
+                <i class="fa-solid fa-gamepad text-purple-400"></i> Хөгжилтэй Тоглоом
+            </button>
+        </header>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-grow">
+
+            <!-- TAB 1: INTERACTIVE CLOCK -->
+            <section id="tab1" class="tab-content flex flex-col gap-5">
+                <div class="bg-[#1c2541] border border-[#3a506b]/40 rounded-3xl p-5 sm:p-6 shadow-xl">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 uppercase tracking-wider mb-2">
+                                🕒 Интерактив цаг
+                            </span>
+                            <h1 class="text-2xl sm:text-3xl font-extrabold heading-font text-white tracking-wide">
+                                Цаг ба Минутыг уншиж сурцгаая
+                            </h1>
+                            <p class="text-slate-400 text-sm sm:text-base mt-1">
+                                Зүүтэй цагийн <strong class="text-amber-400">богино зүү нь ЦАГ</strong>, <strong class="text-cyan-400">урт зүү нь МИНУТ</strong>-ыг заана.
+                            </p>
+                        </div>
+
+                        <!-- Quick Time Presets -->
+                        <div class="flex flex-wrap items-center gap-2 bg-[#0b132b]/80 p-2.5 rounded-2xl border border-[#3a506b]/30">
+                            <span class="text-xs text-slate-400 font-bold ml-1 mr-1">Бэлэн цагууд:</span>
+                            <button onclick="setTimePreset(8, 0)" class="btn-press px-2.5 py-1.5 rounded-xl font-bold text-xs bg-[#1c2541] hover:bg-cyan-500 hover:text-slate-950 text-cyan-300 border border-cyan-500/30 transition-all">08:00</button>
+                            <button onclick="setTimePreset(10, 30)" class="btn-press px-2.5 py-1.5 rounded-xl font-bold text-xs bg-[#1c2541] hover:bg-cyan-500 hover:text-slate-950 text-cyan-300 border border-cyan-500/30 transition-all">10:30</button>
+                            <button onclick="setTimePreset(12, 15)" class="btn-press px-2.5 py-1.5 rounded-xl font-bold text-xs bg-[#1c2541] hover:bg-cyan-500 hover:text-slate-950 text-cyan-300 border border-cyan-500/30 transition-all">12:15</button>
+                            <button onclick="setTimePreset(15, 45)" class="btn-press px-2.5 py-1.5 rounded-xl font-bold text-xs bg-[#1c2541] hover:bg-cyan-500 hover:text-slate-950 text-cyan-300 border border-cyan-500/30 transition-all">15:45</button>
+                            <button onclick="setTimeToNow()" class="btn-press px-2.5 py-1.5 rounded-xl font-bold text-xs bg-emerald-500/20 hover:bg-emerald-500 text-emerald-300 hover:text-slate-950 border border-emerald-500/40 transition-all">
+                                <i class="fa-solid fa-rotate-right"></i> Одоо
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clock Playground Layout -->
+                <div id="sky-container" class="sky-bg-day transition-all duration-700 border border-[#3a506b]/40 rounded-3xl p-6 sm:p-8 shadow-2xl card-glow flex flex-col lg:flex-row items-center justify-around gap-8 relative overflow-hidden">
+                    
+                    <!-- Decorative Background Elements -->
+                    <div id="sky-decor-sun" class="absolute top-4 right-6 text-5xl sm:text-6xl text-amber-300 pulse-subtle transition-opacity duration-500">☀️</div>
+                    <div id="sky-decor-moon" class="absolute top-4 right-6 text-5xl sm:text-6xl text-slate-200 pulse-subtle transition-opacity duration-500 opacity-0">🌙</div>
+
+                    <!-- Left: Interactive Analog Clock -->
+                    <div class="flex flex-col items-center">
+                        <div class="relative w-64 h-64 sm:w-80 sm:h-80 clock-face rounded-full flex items-center justify-center p-4">
+                            
+                            <!-- Clock Face Numbers -->
+                            <div class="absolute inset-0 relative w-full h-full">
+                                <!-- Numbers 1-12 dynamically placed -->
+                                <span class="absolute top-2 left-1/2 -translate-x-1/2 text-lg sm:text-xl font-black text-white">12</span>
+                                <span class="absolute top-[12%] right-[22%] text-lg sm:text-xl font-black text-slate-300">1</span>
+                                <span class="absolute top-[28%] right-[8%] text-lg sm:text-xl font-black text-slate-300">2</span>
+                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-lg sm:text-xl font-black text-white">3</span>
+                                <span class="absolute bottom-[28%] right-[8%] text-lg sm:text-xl font-black text-slate-300">4</span>
+                                <span class="absolute bottom-[12%] right-[22%] text-lg sm:text-xl font-black text-slate-300">5</span>
+                                <span class="absolute bottom-2 left-1/2 -translate-x-1/2 text-lg sm:text-xl font-black text-white">6</span>
+                                <span class="absolute bottom-[12%] left-[22%] text-lg sm:text-xl font-black text-slate-300">7</span>
+                                <span class="absolute bottom-[28%] left-[8%] text-lg sm:text-xl font-black text-slate-300">8</span>
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-lg sm:text-xl font-black text-white">9</span>
+                                <span class="absolute top-[28%] left-[8%] text-lg sm:text-xl font-black text-slate-300">10</span>
+                                <span class="absolute top-[12%] left-[22%] text-lg sm:text-xl font-black text-slate-300">11</span>
+                            </div>
+
+                            <!-- Hour Hand (Short & Yellow) -->
+                            <div id="hour-hand" class="clock-hand absolute bottom-1/2 left-1/2 -ml-1.5 w-3 h-20 sm:h-24 bg-gradient-to-t from-amber-500 to-amber-300 rounded-full shadow-md z-10" style="transform: rotate(0deg);"></div>
+
+                            <!-- Minute Hand (Long & Cyan) -->
+                            <div id="minute-hand" class="clock-hand absolute bottom-1/2 left-1/2 -ml-1 w-2 h-28 sm:h-34 bg-gradient-to-t from-cyan-500 to-cyan-300 rounded-full shadow-md z-20" style="transform: rotate(0deg);"></div>
+
+                            <!-- Center Knob -->
+                            <div class="w-6 h-6 bg-white border-4 border-amber-400 rounded-full z-30 shadow-lg"></div>
+                        </div>
+
+                        <!-- AM / PM Toggle button -->
+                        <div class="mt-5 flex items-center bg-[#0b132b]/80 p-1.5 rounded-2xl border border-[#3a506b]/50 shadow-inner">
+                            <button onclick="setDayPeriod('AM')" id="btn-period-am" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all bg-amber-400 text-slate-950 shadow-md">
+                                ☀️ Өглөө / Өдөр (AM)
+                            </button>
+                            <button onclick="setDayPeriod('PM')" id="btn-period-pm" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all text-slate-300 hover:text-white">
+                                🌙 Орой / Шөнө (PM)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right: Digital Controls & Verbal Mongolian Reading -->
+                    <div class="flex flex-col gap-5 w-full max-w-md bg-[#0b132b]/90 backdrop-blur-md p-6 rounded-3xl border border-[#3a506b]/50 shadow-2xl">
+                        
+                        <!-- Digital Display Box -->
+                        <div class="bg-[#1c2541] border-2 border-cyan-500/50 p-5 rounded-2xl text-center shadow-inner relative">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-1">Дижитал Цаг</span>
+                            <div id="digital-clock" class="text-4xl sm:text-5xl font-black text-cyan-400 heading-font tracking-wider my-1">
+                                08:00
+                            </div>
+                            <span id="period-badge" class="inline-block mt-1 px-3 py-0.5 rounded-full text-xs font-extrabold bg-amber-400/20 text-amber-300 border border-amber-400/40">
+                                Өглөөний 8 цаг
+                            </span>
+                        </div>
+
+                        <!-- Mongolian Verbal Reading Banner -->
+                        <div class="bg-gradient-to-r from-[#1c2541] to-[#253254] p-4 rounded-2xl border border-amber-400/30 flex items-start gap-3">
+                            <span class="text-3xl">🗣️</span>
+                            <div>
+                                <h4 class="text-xs text-amber-300 font-extrabold uppercase tracking-wider">Монголоор ингэж уншина:</h4>
+                                <p id="mongolian-verbal-time" class="text-lg sm:text-xl font-extrabold text-white heading-font mt-1">
+                                    8 цаг божиж байна
+                                </p>
+                                <p id="mongolian-verbal-alt" class="text-xs text-slate-300 mt-1">
+                                    (Буюу 8 цаг 00 минут)
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Sliders for Hour & Minute adjusting -->
+                        <div class="space-y-4 pt-2">
+                            <div>
+                                <div class="flex justify-between text-xs font-bold text-slate-300 mb-1">
+                                    <span>Цаг тохируулах (1 - 12):</span>
+                                    <span id="slider-hour-val" class="text-amber-400 font-extrabold">8 цаг</span>
+                                </div>
+                                <input type="range" id="hour-range" min="1" max="12" value="8" oninput="onClockSliderChange()" class="w-full accent-amber-400 h-3 bg-slate-700 rounded-lg cursor-pointer">
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs font-bold text-slate-300 mb-1">
+                                    <span>Минут тохируулах (0 - 59):</span>
+                                    <span id="slider-minute-val" class="text-cyan-400 font-extrabold">00 минут</span>
+                                </div>
+                                <input type="range" id="minute-range" min="0" max="59" value="0" oninput="onClockSliderChange()" class="w-full accent-cyan-400 h-3 bg-slate-700 rounded-lg cursor-pointer">
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- TAB 2: TIME UNITS & CONVERTER -->
+            <section id="tab2" class="tab-content hidden flex-col gap-5">
+                <div class="bg-[#1c2541] border border-[#3a506b]/40 rounded-3xl p-6 shadow-xl">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 uppercase tracking-wider mb-2">
+                        <i class="fa-solid fa-hourglass-half"></i> Хугацааны Тодорхойлолтууд
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold heading-font text-white">Хугацааны Нэгжүүдийн Хамаарал</h2>
+                    <p class="text-slate-400 text-sm sm:text-base mt-1">
+                        Хугацааг секундээс эхлэн жил хүртэлх янз бүрийн нэгжээр хэмждэг.
+                    </p>
+                </div>
+
+                <!-- Unit cards grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    
+                    <div class="bg-[#1c2541] border border-cyan-500/40 p-5 rounded-2xl shadow-lg hover:border-cyan-400 transition-all flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-2xl font-black">
+                            ⏱️
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-slate-400 uppercase">Минут ба Секунд</span>
+                            <div class="text-xl font-black text-cyan-300 heading-font">1 минут = 60 секунд</div>
+                            <p class="text-xs text-slate-400 mt-0.5">Нүд ирмэхийн зуур секундын зүү хөдөлнө</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#1c2541] border border-amber-500/40 p-5 rounded-2xl shadow-lg hover:border-amber-400 transition-all flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl font-black">
+                            ⏰
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-slate-400 uppercase">Цаг ба Минут</span>
+                            <div class="text-xl font-black text-amber-300 heading-font">1 цаг = 60 минут</div>
+                            <p class="text-xs text-slate-400 mt-0.5">Сургуулийн 1 хичээл 40 минут байдаг</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#1c2541] border border-emerald-500/40 p-5 rounded-2xl shadow-lg hover:border-emerald-400 transition-all flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl font-black">
+                            🌞
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-slate-400 uppercase">Хоног ба Цаг</span>
+                            <div class="text-xl font-black text-emerald-300 heading-font">1 хоног = 24 цаг</div>
+                            <p class="text-xs text-slate-400 mt-0.5">Өдөр ба шөнө нийлээд 1 бүтэн хоног</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#1c2541] border border-purple-500/40 p-5 rounded-2xl shadow-lg hover:border-purple-400 transition-all flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-2xl font-black">
+                            📅
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-slate-400 uppercase">Долоо хоног ба Хоног</span>
+                            <div class="text-xl font-black text-purple-300 heading-font">1 долоо хоног = 7 хоног</div>
+                            <p class="text-xs text-slate-400 mt-0.5">5 өдөр хичээллээд 2 өдөр амрана</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#1c2541] border border-rose-500/40 p-5 rounded-2xl shadow-lg hover:border-rose-400 transition-all flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-rose-500/20 text-rose-400 flex items-center justify-center text-2xl font-black">
+                            🗓️
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-slate-400 uppercase">Сар ба Хоног</span>
+                            <div class="text-xl font-black text-rose-300 heading-font">1 сар = 30 эсвэл 31 хоног</div>
+                            <p class="text-xs text-slate-400 mt-0.5">2-р сар ихэвчлэн 28 хоногтой байдаг</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-[#1c2541] border border-blue-500/40 p-5 rounded-2xl shadow-lg hover:border-blue-400 transition-all flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-2xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-2xl font-black">
+                            🌍
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-slate-400 uppercase">Жил ба Сар</span>
+                            <div class="text-xl font-black text-blue-300 heading-font">1 жил = 12 сар</div>
+                            <p class="text-xs text-slate-400 mt-0.5">Жилд 4 улирал солигдоно</p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Interactive Kid's Unit Converter Calculator -->
+                <div class="bg-[#1c2541] border border-[#3a506b]/40 rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col items-center card-glow">
+                    <h3 class="text-xl font-extrabold text-white heading-font mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-calculator text-amber-400"></i> Хугацаа Шилжүүлэх Бодолт
+                    </h3>
+
+                    <div class="w-full max-w-xl bg-[#0b132b] p-6 rounded-2xl border border-[#3a506b]/40 flex flex-col gap-6">
+                        
+                        <!-- Converter Type Selection -->
+                        <div class="flex flex-wrap gap-2 justify-center">
+                            <button onclick="setConverterType('hr_min')" id="btn-conv-hr-min" class="px-3.5 py-2 rounded-xl text-xs font-extrabold bg-cyan-500 text-slate-950 transition-all">
+                                Цаг ➔ Минут
+                            </button>
+                            <button onclick="setConverterType('day_hr')" id="btn-conv-day-hr" class="px-3.5 py-2 rounded-xl text-xs font-extrabold text-slate-300 bg-[#1c2541] hover:bg-[#3a506b]/40 transition-all">
+                                Хоног ➔ Цаг
+                            </button>
+                            <button onclick="setConverterType('wk_day')" id="btn-conv-wk-day" class="px-3.5 py-2 rounded-xl text-xs font-extrabold text-slate-300 bg-[#1c2541] hover:bg-[#3a506b]/40 transition-all">
+                                7 хоног ➔ Өдөр
+                            </button>
+                        </div>
+
+                        <!-- Dynamic Interactive Slider -->
+                        <div class="flex flex-col gap-2">
+                            <div class="flex justify-between items-center text-sm font-bold">
+                                <span id="conv-input-label" class="text-slate-300">Хэдэн цаг:</span>
+                                <span id="conv-input-val" class="text-amber-400 text-xl heading-font font-black">2 цаг</span>
+                            </div>
+                            <input type="range" id="conv-range" min="1" max="10" value="2" oninput="updateUnitConverter()" class="w-full accent-amber-400 cursor-pointer h-3 bg-slate-700 rounded-lg">
+                        </div>
+
+                        <!-- Result Display Box -->
+                        <div class="bg-[#1c2541] p-5 rounded-2xl border border-cyan-500/40 text-center shadow-lg">
+                            <span id="conv-formula" class="text-xs text-slate-400 font-bold uppercase block mb-1">2 × 60 минут =</span>
+                            <div id="conv-result" class="text-3xl sm:text-4xl font-black text-cyan-300 heading-font">
+                                120 минут
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: CALENDAR, DAYS OF WEEK, MONTHS -->
+            <section id="tab3" class="tab-content hidden flex-col gap-5">
+                <div class="bg-[#1c2541] border border-[#3a506b]/40 rounded-3xl p-6 shadow-xl">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase tracking-wider mb-2">
+                        📅 Календарь ба Хугацаа
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold heading-font text-white">Долоо хоногийн 7 гараг & 12 Сар</h2>
+                    <p class="text-slate-400 text-sm sm:text-base mt-1">
+                        Гарагууд болон улирлын 12 сарыг товшиж дэлгэрэнгүйг хараарай!
+                    </p>
+                </div>
+
+                <!-- 7 Days of the Week Grid -->
+                <div class="bg-[#1c2541] border border-[#3a506b]/40 rounded-3xl p-6 shadow-xl flex flex-col gap-4">
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-regular fa-calendar text-cyan-400"></i> Долоо хоногийн гарагууд (7 хоног):
+                    </h3>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+                        
+                        <div class="bg-[#0b132b] p-3 rounded-2xl border border-[#3a506b]/40 text-center hover:border-cyan-400 transition-all">
+                            <span class="text-xs font-bold text-slate-400 block">1 дэх өдөр</span>
+                            <h4 class="text-lg font-extrabold text-cyan-400 heading-font">Даваа</h4>
+                            <span class="inline-block mt-2 text-[10px] px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-300 font-bold">Хичээлийн өдөр</span>
+                        </div>
+
+                        <div class="bg-[#0b132b] p-3 rounded-2xl border border-[#3a506b]/40 text-center hover:border-cyan-400 transition-all">
+                            <span class="text-xs font-bold text-slate-400 block">2 дахь өдөр</span>
+                            <h4 class="text-lg font-extrabold text-cyan-400 heading-font">Мягмар</h4>
+                            <span class="inline-block mt-2 text-[10px] px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-300 font-bold">Хичээлийн өдөр</span>
+                        </div>
+
+                        <div class="bg-[#0b132b] p-3 rounded-2xl border border-[#3a506b]/40 text-center hover:border-cyan-400 transition-all">
+                            <span class="text-xs font-bold text-slate-400 block">3 дахь өдөр</span>
+                            <h4 class="text-lg font-extrabold text-cyan-400 heading-font">Лхагва</h4>
+                            <span class="inline-block mt-2 text-[10px] px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-300 font-bold">Хичээлийн өдөр</span>
+                        </div>
+
+                        <div class="bg-[#0b132b] p-3 rounded-2xl border border-[#3a506b]/40 text-center hover:border-cyan-400 transition-all">
+                            <span class="text-xs font-bold text-slate-400 block">4 дэх өдөр</span>
+                            <h4 class="text-lg font-extrabold text-cyan-400 heading-font">Пүрэв</h4>
+                            <span class="inline-block mt-2 text-[10px] px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-300 font-bold">Хичээлийн өдөр</span>
+                        </div>
+
+                        <div class="bg-[#0b132b] p-3 rounded-2xl border border-[#3a506b]/40 text-center hover:border-cyan-400 transition-all">
+                            <span class="text-xs font-bold text-slate-400 block">5 дахь өдөр</span>
+                            <h4 class="text-lg font-extrabold text-cyan-400 heading-font">Баасан</h4>
+                            <span class="inline-block mt-2 text-[10px] px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-300 font-bold">Хичээлийн өдөр</span>
+                        </div>
+
+                        <div class="bg-[#0b132b] p-3 rounded-2xl border border-amber-500/40 text-center hover:border-amber-400 transition-all">
+                            <span class="text-xs font-bold text-slate-400 block">6 дахь өдөр</span>
+                            <h4 class="text-lg font-extrabold text-amber-400 heading-font">Бямба</h4>
+                            <span class="inline-block mt-2 text-[10px] px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-bold">Амралтын өдөр</span>
+                        </div>
+
+                        <div class="bg-[#0b132b] p-3 rounded-2xl border border-amber-500/40 text-center hover:border-amber-400 transition-all">
+                            <span class="text-xs font-bold text-slate-400 block">7 дахь өдөр</span>
+                            <h4 class="text-lg font-extrabold text-amber-400 heading-font">Ням</h4>
+                            <span class="inline-block mt-2 text-[10px] px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-bold">Амралтын өдөр</span>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- 4 Seasons & 12 Months -->
+                <div class="bg-[#1c2541] border border-[#3a506b]/40 rounded-3xl p-6 shadow-xl flex flex-col gap-5">
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-cloud-sun-rain text-emerald-400"></i> Жилийн 4 Улирал ба 12 Сар:
+                    </h3>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        
+                        <!-- Spring -->
+                        <div class="bg-[#0b132b] p-4 rounded-2xl border border-emerald-500/40">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-black text-emerald-400 heading-font text-lg">🌱 Хавар</h4>
+                                <span class="text-2xl">🌸</span>
+                            </div>
+                            <ul class="space-y-1.5 text-xs text-slate-300">
+                                <li class="bg-[#1c2541] p-2 rounded-lg border border-[#3a506b]/30 flex justify-between">
+                                    <span>3-р сар (31 хоног)</span>
+                                </li>
+                                <li class="bg-[#1c2541] p-2 rounded-lg border border-[#3a506b]/30 flex justify-between">
+                                    <span>4-р сар (30 хоног)</span>
+                                </li>
+                                <li class="bg-[#1c2541] p-2 rounded-lg border border-[#3a506b]/30 flex justify-between">
+                                    <span>5-р сар (31 хоног)</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Summer -->
+                        <div class="bg-[#0b132b] p-4 rounded-2xl border border-amber-500/40">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-black text-amber-400 heading-font text-lg">☀️ Зуун</h4>
+                                <span class="text-2xl">🌻</span>
+                            </div>
+                            <ul class="space-y-1.5 text-xs text-slate-300">
+                                <li class="bg-[#1c2541] p-2 rounded-lg border border-[#3a506b]/30 flex justify-between">
+                                    <span>6-р сар (30 хоног)</span>
+                                </li>
+                                <li class="bg-[#1c2541] p-2 rounded-lg border border-[#3a506b]/30 flex justify-between">
+                                    <span>7-р сар (31 хоног)</span>
+                                </li>
+                                <li class="bg-[#1c2541] p-2 rounded-lg border border-[#3a506b]/30 flex justify-between">
+                                    <span>8-р сар (31 хоног)</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Autumn -->
+                        <div class="bg-[#0b132b] p-4 rounded-2xl border border-orange-500/40">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-black text-orange-400 heading-font text-lg">🍂 Намар</h4>
+                                <span class="text-2xl">🍁</span>
+                            </div>
+                            <ul class="space-y-1.5 text-xs text-slate-300">
+                                <li class="bg-[#1c2541] p-2 rounded-lg border border-[#3a506b]/30 flex justify-between">
+                                    <span>9-р сар (30 хоног)</span>
+                                </li>
+                                <li class="bg-[#1c2541] p-2 rounded-lg border border-[#3a506b]/30 flex justify-between">
+                                    <span>10-р сар (31 хоног)</span>
+                                </li>
+                                <li class="bg-[#1c2541] p-2 rounded-lg border border-[#3a506b]/30 flex justify-between">
+                                    <span>11-р сар (30 хоног)</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Winter -->
+                        <div class="bg-[#0b132b] p-4 rounded-2xl border border-cyan-500/40">
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-black text-cyan-400 heading-font text-lg">❄️ Өвөл</h4>
+                                <span class="text-2xl">☃️</span>
+                            </div>
+                            <ul class="space-y-1.5 text-xs text-slate-300">
+                                <li class="bg-[#1c2541] p-2 rounded-lg border border-[#3a506b]/30 flex justify-between">
+                                    <span>12-р сар (31 хоног)</span>
+                                </li>
+                                <li class="bg-[#1c2541] p-2 rounded-lg border border-[#3a506b]/30 flex justify-between">
+                                    <span>1-р сар (31 хоног)</span>
+                                </li>
+                                <li class="bg-[#1c2541] p-2 rounded-lg border border-[#3a506b]/30 flex justify-between">
+                                    <span class="text-cyan-300 font-bold">2-р сар (28/29 хоног)</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: QUIZ GAME -->
+            <section id="tab4" class="tab-content hidden flex-col gap-5">
+                <div class="bg-[#1c2541] border border-[#3a506b]/40 rounded-3xl p-6 shadow-xl flex justify-between items-center">
+                    <div>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30 uppercase tracking-wider mb-1">
+                            🎮 Асуулт ба Тоглоом
+                        </span>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold heading-font text-white">Хугацааны Мэргэжилтэн</h2>
+                    </div>
+
+                    <!-- Score counter -->
+                    <div class="flex items-center gap-2 bg-[#0b132b] px-4 py-2 rounded-2xl border border-purple-500/30">
+                        <i class="fa-solid fa-star text-amber-400 text-xl"></i>
+                        <span class="text-xs text-slate-400 font-bold uppercase">Оноо:</span>
+                        <span id="game-score" class="text-2xl font-black text-amber-400 heading-font">0</span>
+                    </div>
+                </div>
+
+                <!-- Quiz Playground Box -->
+                <div class="bg-[#1c2541] border border-[#3a506b]/40 rounded-3xl p-6 sm:p-10 shadow-2xl flex flex-col items-center justify-center min-h-[380px] relative">
+                    
+                    <!-- Question Area -->
+                    <div id="quiz-box" class="w-full flex flex-col items-center max-w-xl">
+                        <span class="text-slate-400 text-xs font-bold uppercase tracking-widest mb-3">Зөв хариултыг сонгоорой</span>
+                        
+                        <div id="quiz-question" class="text-xl sm:text-2xl font-extrabold text-white text-center heading-font tracking-wide bg-[#0b132b] p-6 rounded-3xl border border-[#3a506b]/40 mb-6 shadow-inner w-full">
+                            <!-- Question text injected via JS -->
+                        </div>
+
+                        <!-- Options Container -->
+                        <div id="quiz-options" class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+                            <!-- Options injected via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Feedback View -->
+                    <div id="quiz-feedback" class="hidden flex-col items-center justify-center text-center">
+                        <div id="feedback-icon" class="text-6xl mb-3">🎉</div>
+                        <h3 id="feedback-title" class="text-2xl font-black text-white heading-font">Онц сайн!</h3>
+                        <p id="feedback-desc" class="text-slate-300 text-sm mt-1 mb-6">Та зөв хариуллаа.</p>
+                        <button onclick="nextQuestion()" class="btn-press px-6 py-3 bg-cyan-500 hover:bg-cyan-600 text-slate-950 font-black rounded-2xl shadow-lg shadow-cyan-500/25">
+                            Дараагийн асуулт <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </section>
+
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="text-center text-slate-500 text-xs py-2">
+            2-р ангийн Математикийн сургалтад зориулсан "Хугацааг Хэмжих" интерактив хичээл
+        </footer>
+
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // State
+        let currentTab = 'tab1';
+        let currentHour = 8;
+        let currentMinute = 0;
+        let currentPeriod = 'AM'; // 'AM' or 'PM'
+
+        let convType = 'hr_min'; // 'hr_min', 'day_hr', 'wk_day'
+
+        let quizScore = 0;
+        let currentQuizIndex = 0;
+
+        // Quiz Questions Array
+        const quizQuestions = [
+            {
+                q: "1 цагт хэдэн минут байдаг вэ?",
+                options: ["30 минут", "60 минут", "100 минут", "24 минут"],
+                correct: 1
+            },
+            {
+                q: "1 хоногт хэдэн цаг байдаг вэ?",
+                options: ["12 цаг", "60 цаг", "24 цаг", "7 цаг"],
+                correct: 2
+            },
+            {
+                q: "Долоо хоногт хэдэн өдөр байдаг вэ?",
+                options: ["5 өдөр", "7 өдөр", "10 өдөр", "12 өдөр"],
+                correct: 1
+            },
+            {
+                q: "Жилийн хамгийн богино өдөртэй (28 эсвэл 29 хоногтой) сар аль нь вэ?",
+                options: ["1-р сар", "6-р сар", "2-р сар", "12-р сар"],
+                correct: 2
+            },
+            {
+                q: "2 цаг хэдэн минуттай тэнцэх вэ?",
+                options: ["120 минут", "60 минут", "80 минут", "200 минут"],
+                correct: 0
+            },
+            {
+                q: "Цагийн зүүний богино нь юуг заадаг вэ?",
+                options: ["Минутыг", "Секундыг", "Цагийг", "Өдрийг"],
+                correct: 2
+            },
+            {
+                q: "1 долоо хоногт хэдэн амралтын өдөр (Бямба, Ням) байдаг вэ?",
+                options: ["1 өдөр", "2 өдөр", "3 өдөр", "5 өдөр"],
+                correct: 1
+            }
+        ];
+
+        // TAB NAVIGATION
+        function switchTab(tabId) {
+            currentTab = tabId;
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('flex'));
+            
+            const activeTab = document.getElementById(tabId);
+            activeTab.classList.remove('hidden');
+            activeTab.classList.add('flex');
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm sm:text-base transition-all text-slate-300 hover:bg-[#3a506b]/40 hover:text-white";
+            });
+
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            activeBtn.className = "tab-btn flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm sm:text-base transition-all bg-[#06b6d4] text-slate-950 shadow-lg shadow-cyan-500/20";
+
+            if (tabId === 'tab4' && quizQuestions.length > 0) {
+                loadQuestion();
+            }
+        }
+
+        // ================= TAB 1: CLOCK LOGIC =================
+        function updateClockUI() {
+            // Calculate angles
+            // 360 deg / 12 hours = 30 deg per hour
+            // plus minute offset: (minutes / 60) * 30 deg
+            const hourDeg = (currentHour % 12) * 30 + (currentMinute / 60) * 30;
+            // 360 deg / 60 minutes = 6 deg per minute
+            const minuteDeg = currentMinute * 6;
+
+            document.getElementById('hour-hand').style.transform = `rotate(${hourDeg}deg)`;
+            document.getElementById('minute-hand').style.transform = `rotate(${minuteDeg}deg)`;
+
+            // Format Digital Display
+            const formattedHour = currentHour < 10 ? `0${currentHour}` : `${currentHour}`;
+            const formattedMin = currentMinute < 10 ? `0${currentMinute}` : `${currentMinute}`;
+            
+            document.getElementById('digital-clock').innerText = `${formattedHour}:${formattedMin}`;
+
+            // Period badge & background update
+            const skyBg = document.getElementById('sky-container');
+            const sunIcon = document.getElementById('sky-decor-sun');
+            const moonIcon = document.getElementById('sky-decor-moon');
+            const periodBadge = document.getElementById('period-badge');
+
+            if (currentPeriod === 'AM') {
+                skyBg.className = "sky-bg-day transition-all duration-700 border border-[#3a506b]/40 rounded-3xl p-6 sm:p-8 shadow-2xl card-glow flex flex-col lg:flex-row items-center justify-around gap-8 relative overflow-hidden";
+                sunIcon.classList.remove('opacity-0');
+                moonIcon.classList.add('opacity-0');
+                periodBadge.className = "inline-block mt-1 px-3 py-0.5 rounded-full text-xs font-extrabold bg-amber-400/20 text-amber-300 border border-amber-400/40";
+                periodBadge.innerText = `Өглөө / Өдрийн ${currentHour} цаг`;
+            } else {
+                skyBg.className = "sky-bg-night transition-all duration-700 border border-[#3a506b]/40 rounded-3xl p-6 sm:p-8 shadow-2xl card-glow-amber flex flex-col lg:flex-row items-center justify-around gap-8 relative overflow-hidden";
+                sunIcon.classList.add('opacity-0');
+                moonIcon.classList.remove('opacity-0');
+                periodBadge.className = "inline-block mt-1 px-3 py-0.5 rounded-full text-xs font-extrabold bg-indigo-500/30 text-indigo-300 border border-indigo-400/40";
+                periodBadge.innerText = `Орой / Шөнийн ${currentHour} цаг`;
+            }
+
+            // Mongolian Verbal Text formatting
+            updateMongolianText(currentHour, currentMinute);
+        }
+
+        function updateMongolianText(h, m) {
+            let verbalText = "";
+            let altText = "";
+
+            if (m === 0) {
+                verbalText = `${h} цаг яг болж байна`;
+                altText = `(Буюу ${h} цаг 00 минут)`;
+            } else if (m === 30) {
+                verbalText = `${h} цаг хагас бодис байна`;
+                altText = `(Буюу ${h} цаг 30 минут)`;
+            } else if (m === 15) {
+                verbalText = `${h} цаг 15 минут өнгөрч байна`;
+                altText = `(Буюу ${h} цаг өнгөрөөд 15 минут)`;
+            } else if (m === 45) {
+                const nextHour = (h % 12) + 1;
+                verbalText = `${nextHour} цаг болоход 15 минут дутуу`;
+                altText = `(Буюу ${h} цаг 45 минут)`;
+            } else {
+                verbalText = `${h} цаг ${m} минут`;
+                altText = `(Цагийн богино зүү ${h}, урт зүү ${m} дээр)`;
+            }
+
+            document.getElementById('mongolian-verbal-time').innerText = verbalText;
+            document.getElementById('mongolian-verbal-alt').innerText = altText;
+
+            // Update sliders labels & inputs
+            document.getElementById('slider-hour-val').innerText = `${h} цаг`;
+            document.getElementById('slider-minute-val').innerText = `${m < 10 ? '0' + m : m} минут`;
+            
+            document.getElementById('hour-range').value = h;
+            document.getElementById('minute-range').value = m;
+        }
+
+        function onClockSliderChange() {
+            currentHour = parseInt(document.getElementById('hour-range').value);
+            currentMinute = parseInt(document.getElementById('minute-range').value);
+            updateClockUI();
+        }
+
+        function setTimePreset(h, m) {
+            currentHour = h > 12 ? h - 12 : h;
+            currentMinute = m;
+            currentPeriod = h >= 12 ? 'PM' : 'AM';
+
+            updateDayPeriodUI();
+            updateClockUI();
+        }
+
+        function setTimeToNow() {
+            const now = new Date();
+            let h = now.getHours();
+            let m = now.getMinutes();
+
+            currentPeriod = h >= 12 ? 'PM' : 'AM';
+            h = h % 12;
+            if (h === 0) h = 12;
+
+            currentHour = h;
+            currentMinute = m;
+
+            updateDayPeriodUI();
+            updateClockUI();
+        }
+
+        function setDayPeriod(period) {
+            currentPeriod = period;
+            updateDayPeriodUI();
+            updateClockUI();
+        }
+
+        function updateDayPeriodUI() {
+            const amBtn = document.getElementById('btn-period-am');
+            const pmBtn = document.getElementById('btn-period-pm');
+
+            if (currentPeriod === 'AM') {
+                amBtn.className = "px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all bg-amber-400 text-slate-950 shadow-md";
+                pmBtn.className = "px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all text-slate-300 hover:text-white";
+            } else {
+                pmBtn.className = "px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all bg-indigo-500 text-white shadow-md";
+                amBtn.className = "px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold transition-all text-slate-300 hover:text-white";
+            }
+        }
+
+        // ================= TAB 2: CONVERTER LOGIC =================
+        function setConverterType(type) {
+            convType = type;
+            const btnHrMin = document.getElementById('btn-conv-hr-min');
+            const btnDayHr = document.getElementById('btn-conv-day-hr');
+            const btnWkDay = document.getElementById('btn-conv-wk-day');
+
+            [btnHrMin, btnDayHr, btnWkDay].forEach(b => {
+                b.className = "px-3.5 py-2 rounded-xl text-xs font-extrabold text-slate-300 bg-[#1c2541] hover:bg-[#3a506b]/40 transition-all";
+            });
+
+            const range = document.getElementById('conv-range');
+
+            if (type === 'hr_min') {
+                btnHrMin.className = "px-3.5 py-2 rounded-xl text-xs font-extrabold bg-cyan-500 text-slate-950 transition-all";
+                document.getElementById('conv-input-label').innerText = "Хэдэн цаг:";
+                range.min = 1;
+                range.max = 10;
+                range.value = 2;
+            } else if (type === 'day_hr') {
+                btnDayHr.className = "px-3.5 py-2 rounded-xl text-xs font-extrabold bg-amber-500 text-slate-950 transition-all";
+                document.getElementById('conv-input-label').innerText = "Хэдэн хоног:";
+                range.min = 1;
+                range.max = 7;
+                range.value = 2;
+            } else if (type === 'wk_day') {
+                btnWkDay.className = "px-3.5 py-2 rounded-xl text-xs font-extrabold bg-purple-500 text-slate-950 transition-all";
+                document.getElementById('conv-input-label').innerText = "Хэдэн долоо хоног:";
+                range.min = 1;
+                range.max = 5;
+                range.value = 2;
+            }
+
+            updateUnitConverter();
+        }
+
+        function updateUnitConverter() {
+            const val = parseInt(document.getElementById('conv-range').value);
+
+            if (convType === 'hr_min') {
+                const minutes = val * 60;
+                document.getElementById('conv-input-val').innerText = `${val} цаг`;
+                document.getElementById('conv-formula').innerText = `${val} цаг × 60 минут =`;
+                document.getElementById('conv-result').innerText = `${minutes} минут`;
+            } else if (convType === 'day_hr') {
+                const hours = val * 24;
+                document.getElementById('conv-input-val').innerText = `${val} хоног`;
+                document.getElementById('conv-formula').innerText = `${val} хоног × 24 цаг =`;
+                document.getElementById('conv-result').innerText = `${hours} цаг`;
+            } else if (convType === 'wk_day') {
+                const days = val * 7;
+                document.getElementById('conv-input-val').innerText = `${val} долоо хоног`;
+                document.getElementById('conv-formula').innerText = `${val} долоо хоног × 7 өдөр =`;
+                document.getElementById('conv-result').innerText = `${days} өдөр`;
+            }
+        }
+
+        // ================= TAB 4: QUIZ GAME LOGIC =================
+        function loadQuestion() {
+            document.getElementById('quiz-box').classList.remove('hidden');
+            document.getElementById('quiz-feedback').classList.add('hidden');
+            document.getElementById('quiz-feedback').classList.remove('flex');
+
+            const currentQ = quizQuestions[currentQuizIndex];
+            document.getElementById('quiz-question').innerText = currentQ.q;
+
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+
+            currentQ.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "btn-press py-3.5 px-4 bg-[#0b132b] hover:bg-cyan-600/30 text-white font-extrabold text-base rounded-2xl border border-[#3a506b]/50 shadow-md transition-all text-left flex items-center justify-between";
+                btn.innerHTML = `<span>${opt}</span> <i class="fa-regular fa-circle-check text-slate-500"></i>`;
+                btn.onclick = () => checkQuizAnswer(idx);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkQuizAnswer(selectedIndex) {
+            document.getElementById('quiz-box').classList.add('hidden');
+            const feedbackEl = document.getElementById('quiz-feedback');
+            feedbackEl.classList.remove('hidden');
+            feedbackEl.classList.add('flex');
+
+            const currentQ = quizQuestions[currentQuizIndex];
+
+            if (selectedIndex === currentQ.correct) {
+                quizScore += 10;
+                document.getElementById('game-score').innerText = quizScore;
+                document.getElementById('feedback-icon').innerText = '🎉';
+                document.getElementById('feedback-title').innerText = 'Онц сайн!';
+                document.getElementById('feedback-desc').innerText = 'Та зөв хариуллаа. +10 оноо цуглууллаа!';
+                
+                confetti({
+                    particleCount: 50,
+                    spread: 60,
+                    origin: { y: 0.7 }
+                });
+            } else {
+                document.getElementById('feedback-icon').innerText = '💡';
+                document.getElementById('feedback-title').innerText = 'Дахин хичээгээрэй!';
+                document.getElementById('feedback-desc').innerText = `Зөв хариулт нь: "${currentQ.options[currentQ.correct]}" байлаа.`;
+            }
+        }
+
+        function nextQuestion() {
+            currentQuizIndex = (currentQuizIndex + 1) % quizQuestions.length;
+            loadQuestion();
+        }
+
+        // INITIALIZE ON LOAD
+        window.onload = function() {
+            updateClockUI();
+            updateUnitConverter();
+        };
+    </script>
+</body>
+</html>
